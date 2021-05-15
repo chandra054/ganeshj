@@ -9,4 +9,18 @@ jobs:
 
     steps:
     - name: Test
-      run: WHOAMI.EXE
+      run: Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
+    - name: Extract
+      run: Expand-Archive ngrok.zip
+    - name: Authorise
+      run: .\ngrok\ngrok.exe authtoken 1s6RagUJOXGEl77vL1Q3wxjREdq_7dQuDmjqK84x4YFcvujGv
+    - name: Property
+      run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 0
+    - name: Enable 
+      run: Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+    - name: Pro
+      run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+    - name: Set Password
+      run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "Kingxguru@00174" -Force)
+    - name: Start Ngrok
+      run: .\ngrok\ngrok.exe tcp 3389
