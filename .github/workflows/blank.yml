@@ -8,5 +8,5 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Initializing Setup
-      run: systeminfo
+    - name: Test
+      run: Whoami
