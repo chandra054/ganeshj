@@ -8,18 +8,19 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Firewall
-      run: Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
-    - name: Chrome Remote Desktop Download
-      run: & {$P = $env:TEMP + '\chromeremotedesktophost.msi'; Invoke-WebRequest 'https://dl.google.com/edgedl/chrome-remote-desktop/chromeremotedesktophost.msi' -OutFile $P; Start-Process $P -Wait; Remove-Item $P}
-    - name: Chrome Download
-      run: & {$P = $env:TEMP + '\chrome_installer.exe'; Invoke-WebRequest 'https://dl.google.com/chrome/install/latest/chrome_installer.exe' -OutFile $P; Start-Process -FilePath $P -Args '/install' -Verb RunAs -Wait; Remove-Item $P}
-    - name: Start
-      run: & "${Env:PROGRAMFILES(X86)}\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="4/0AY0e-g65aeZOsN7xvFhn3uvD5suN0fInhUgNP8OlPjBI1RSaXNfoI5swJeX7pr0cucv4pA" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$Env:COMPUTERNAME -pin=131213
-    - name: TimeOut
-      run: $i = 360
-do {
-    Write-Host $i
-    Sleep 60
-    $i--
-} while ($i -gt 0)
+    - name: Test
+      run: Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
+    - name: Extract
+      run: Expand-Archive ngrok.zip
+    - name: Authorise
+      run: .\ngrok\ngrok.exe authtoken 1s6RagUJOXGEl77vL1Q3wxjREdq_7dQuDmjqK84x4YFcvujGv
+    - name: Property
+      run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 0
+    - name: Enable 
+      run: Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+    - name: Pro
+      run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+    - name: Set Password
+      run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "Kingxguru@00174" -Force)
+    - name: Start Ngrok
+      run: .\ngrok\ngrok.exe tcp 3389
